@@ -44,6 +44,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IAccessRule;
@@ -1307,10 +1308,14 @@ public class BuildPathManagerTest extends AbstractMavenProjectTestCase {
   public void test359725_resourcesWorkspaceRoot() throws Exception {
     // m2e does not support resources outside of project basedir.
     // the point of this test is to verify m2e can import such unsupported projects
-
-    IProject project = importProject("projects/359725_resourcesWorkspaceRoot/pom.xml");
+    File baseDir = new File(FileLocator
+        .toFileURL(
+            BuildPathManagerTest.class.getResource("/projects/359725_resourcesWorkspaceRoot/m2e-test-parent/pom.xml"))
+        .getFile()).getParentFile().getParentFile();
     waitForJobsToComplete();
-
+    IProject project = importProjects(baseDir.getAbsolutePath(), new String[] {"m2e-test-parent/pom.xml"},
+        new ResolverConfiguration())[0];
+    waitForJobsToComplete();
     project.build(IncrementalProjectBuilder.FULL_BUILD, monitor);
 
     assertNoErrors(project);
